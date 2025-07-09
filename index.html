@@ -83,7 +83,7 @@
             color: white;
             border-color: #0284c7;
       }
-      #generate-sentence-btn:disabled, #explain-original-btn:disabled {
+      .ai-btn:disabled {
             background-color: #e2e8f0;
             color: #94a3b8;
             cursor: not-allowed;
@@ -129,6 +129,23 @@
                         </div>
                   </div>
                </div>
+               <div>
+                  <label class="block text-sm font-medium text-slate-700 mb-2">Difficulty</label>
+                  <div class="flex justify-center space-x-2">
+                        <div class="custom-radio">
+                           <input type="radio" id="difficulty-easy" name="difficulty-mode" value="easy" class="hidden">
+                           <label for="difficulty-easy" class="custom-radio-label">Baby</label>
+                        </div>
+                        <div class="custom-radio">
+                           <input type="radio" id="difficulty-medium" name="difficulty-mode" value="medium" class="hidden">
+                           <label for="difficulty-medium" class="custom-radio-label">Apprentice</label>
+                        </div>
+                        <div class="custom-radio">
+                           <input type="radio" id="difficulty-hard" name="difficulty-mode" value="hard" class="hidden">
+                           <label for="difficulty-hard" class="custom-radio-label">Native</label>
+                        </div>
+                  </div>
+               </div>
                <button id="start-btn" class="w-full bg-sky-500 text-white font-bold py-3 px-6 rounded-lg shadow-md hover:bg-sky-600 transition-all duration-200 !mt-6">Start Learning</button>
             </div>
       </div>
@@ -137,7 +154,7 @@
             <div id="card-container" class="relative w-full perspective-[1000px]">
                <div id="card" class="relative w-full rounded-xl shadow-lg bg-white card">
                   <div class="card-face">
-                        <p class="text-3xl md:text-4xl font-semibold leading-tight" id="front-text">Loading...</p>
+                        <div id="front-text" class="text-3xl md:text-4xl font-semibold leading-tight">Loading...</div>
                   </div>
                   <div class="card-face card-back">
                         <div id="answer-content" class="w-full">
@@ -145,9 +162,9 @@
                               <p class="text-2xl text-slate-900 font-semibold mb-2" id="sentence-hanzi-post"></p>
                               <p class="text-lg text-slate-500 mb-2" id="sentence-pinyin"></p>
                               <p class="text-lg text-slate-700 font-medium mb-4" id="sentence-english"></p>
-                              <div class="absolute -top-2 -right-2 flex flex-col space-y-2 z-10">
-                                    <button id="generate-sentence-btn" title="Generate a new example" class="bg-sky-100 text-sky-600 rounded-full py-1 px-3 text-sm font-semibold hover:bg-sky-200 transition-all">New Example</button>
-                                    <button id="explain-original-btn" title="Explain this sentence" class="bg-amber-100 text-amber-600 rounded-full py-1 px-3 text-sm font-semibold hover:bg-amber-200 transition-all">Explain</button>
+                              <div style="transform: translateZ(1px);" class="absolute -top-2 -right-2 flex flex-col space-y-2 z-10">
+                                    <button id="generate-sentence-btn" title="Generate a new example" class="ai-btn bg-sky-100 text-sky-600 rounded-full py-1 px-3 text-sm font-semibold hover:bg-sky-200 transition-all">New Example</button>
+                                    <button id="explain-original-btn" title="Explain this sentence" class="ai-btn bg-amber-100 text-amber-600 rounded-full py-1 px-3 text-sm font-semibold hover:bg-amber-200 transition-all">Explain</button>
                               </div>
                               <div class="border-t border-slate-200 w-full my-4"></div>
                            </div>
@@ -2464,6 +2481,7 @@
                useSeed: true,
                isRandom: false,
                studyMode: 'sentence',
+               difficulty: 'easy',
             },
             aiGeneratedSentence: null,
       };
@@ -2492,6 +2510,7 @@
             setToggleState(useSeedToggle, state.settings.useSeed);
             setToggleState(randomToggle, state.settings.isRandom);
             document.querySelector(`#setup-screen input[name="study-mode"][value="${state.settings.studyMode}"]`).checked = true;
+            document.querySelector(`#setup-screen input[name="difficulty-mode"][value="${state.settings.difficulty}"]`).checked = true;
             seedInputContainerEl.style.display = state.settings.useSeed ? 'block' : 'none';
             updateAIFeatureAvailability();
       }
@@ -2527,8 +2546,7 @@
             packNames.forEach(name => {
                const option = document.createElement('option');
                option.value = name;
-               const count = vocabPacks[name].length;
-               option.textContent = `${name} (${count} cards)`;
+               option.textContent = `${name} (${vocabPacks[name].length} cards)`;
                packSelectEl.appendChild(option);
             });
       }
@@ -2542,6 +2560,7 @@
 
       function initSession() {
             state.settings.studyMode = document.querySelector('#setup-screen input[name="study-mode"]:checked').value;
+            state.settings.difficulty = document.querySelector('#setup-screen input[name="difficulty-mode"]:checked').value;
             localStorage.setItem('flashcardSettings', JSON.stringify(state.settings));
             state.currentPackName = packSelectEl.value;
             let sessionVocab = [...vocabPacks[state.currentPackName]];
@@ -2587,17 +2606,36 @@
                sentenceHanziPostEl.textContent = state.currentCard.sentence_hanzi;
                sentencePinyinEl.textContent = state.currentCard.sentence_pinyin;
                sentenceEnglishEl.textContent = state.currentCard.sentence_english;
-               sentenceDetailsEl.classList.remove('hidden');
 
+               let frontContent = '';
                if (state.settings.studyMode === 'word') {
-                  frontTextEl.textContent = state.currentCard.hanzi;
-                  frontTextEl.classList.add('text-5xl');
-                  frontTextEl.classList.remove('text-3xl', 'md:text-4xl');
-               } else {
-                  frontTextEl.textContent = state.currentCard.sentence_hanzi;
-                  frontTextEl.classList.remove('text-5xl');
-                  frontTextEl.classList.add('text-3xl', 'md:text-4xl');
+                     switch (state.settings.difficulty) {
+                        case 'easy':
+                           frontContent = `<p class="text-3xl">${state.currentCard.pinyin}</p>`;
+                           break;
+                        case 'medium':
+                           frontContent = `<p class="text-5xl">${state.currentCard.hanzi}</p><p class="text-2xl text-slate-500 mt-2">${state.currentCard.pinyin}</p>`;
+                           break;
+                        case 'hard':
+                        default:
+                           frontContent = `<p class="text-5xl">${state.currentCard.hanzi}</p>`;
+                           break;
+                  }
+               } else { // Sentence mode
+                  switch (state.settings.difficulty) {
+                        case 'easy':
+                           frontContent = `<p class="text-2xl">${state.currentCard.sentence_pinyin}</p>`;
+                           break;
+                        case 'medium':
+                           frontContent = `<p>${state.currentCard.sentence_hanzi}</p><p class="text-xl text-slate-500 mt-2">${state.currentCard.sentence_pinyin}</p>`;
+                           break;
+                        case 'hard':
+                        default:
+                           frontContent = `<p>${state.currentCard.sentence_hanzi}</p>`;
+                           break;
+                  }
                }
+               frontTextEl.innerHTML = frontContent;
             }, 150);
 
             showAnswerBtn.style.display = 'block';
@@ -2679,7 +2717,7 @@
             aiModalTitle.textContent = 'New Example Sentence';
             state.aiGeneratedSentence = null;
 
-            const wordToUse = state.currentCard.hanzi.split(' ')[0];
+            const wordToUse = state.currentCard.pinyin;
             const currentSentence = state.currentCard.sentence_hanzi;
             const prompt = `The current Chinese sentence is: "${currentSentence}". Using the Chinese word "${wordToUse}", create a simple, new example sentence that is related to the context of the first sentence. Provide the new sentence in these three parts, clearly labeled: "Hanzi:", "Pinyin:", and "English:".`;
             
