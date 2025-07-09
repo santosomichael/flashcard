@@ -65,7 +65,9 @@
             border-radius: 0.75rem;
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
             width: 90%;
-            max-width: 400px;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
       }
       /* Custom radio button styles */
       .custom-radio-label {
@@ -81,6 +83,15 @@
             color: white;
             border-color: #0284c7;
       }
+      #generate-sentence-btn:disabled, #explain-original-btn:disabled {
+            background-color: #e2e8f0;
+            color: #94a3b8;
+            cursor: not-allowed;
+      }
+      #ai-explanation {
+            max-height: 250px;
+            overflow-y: auto;
+      }
    </style>
 </head>
 <body class="bg-slate-100 text-slate-800 flex flex-col items-center justify-center min-h-screen p-4">
@@ -90,10 +101,7 @@
             <h1 class="text-3xl font-bold text-sky-600">Flashcard</h1>
             <p class="text-slate-500">How to conquer the world just using your tongue (and brain of course)</p>
             <button id="settings-btn" class="absolute top-0 right-0 p-2 text-slate-500 hover:text-sky-600">
-               <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.096 2.572-1.065z" />
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-               </svg>
+               <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.096 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
             </button>
       </header>
 
@@ -102,8 +110,7 @@
             <div class="space-y-4">
                <div>
                   <label for="pack-select" class="block text-sm font-medium text-slate-700 mb-1">Vocabulary Pack:</label>
-                  <select id="pack-select" class="w-full p-2 border border-slate-300 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500">
-                  </select>
+                  <select id="pack-select" class="w-full p-2 border border-slate-300 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500"></select>
                </div>
                <div id="seed-input-container">
                   <label for="seed-input" class="block text-sm font-medium text-slate-700 mb-1">Page / Seed Number:</label>
@@ -122,9 +129,7 @@
                         </div>
                   </div>
                </div>
-               <button id="start-btn" class="w-full bg-sky-500 text-white font-bold py-3 px-6 rounded-lg shadow-md hover:bg-sky-600 transition-all duration-200 !mt-6">
-                  Start Learning
-               </button>
+               <button id="start-btn" class="w-full bg-sky-500 text-white font-bold py-3 px-6 rounded-lg shadow-md hover:bg-sky-600 transition-all duration-200 !mt-6">Start Learning</button>
             </div>
       </div>
 
@@ -135,14 +140,18 @@
                         <p class="text-3xl md:text-4xl font-semibold leading-tight" id="front-text">Loading...</p>
                   </div>
                   <div class="card-face card-back">
-                        <div id="answer-content">
-                           <div id="sentence-details">
+                        <div id="answer-content" class="w-full">
+                           <div id="sentence-details" class="relative p-4">
                               <p class="text-2xl text-slate-900 font-semibold mb-2" id="sentence-hanzi-post"></p>
                               <p class="text-lg text-slate-500 mb-2" id="sentence-pinyin"></p>
                               <p class="text-lg text-slate-700 font-medium mb-4" id="sentence-english"></p>
+                              <div class="absolute -top-2 -right-2 flex flex-col space-y-2 z-10">
+                                    <button id="generate-sentence-btn" title="Generate a new example" class="bg-sky-100 text-sky-600 rounded-full py-1 px-3 text-sm font-semibold hover:bg-sky-200 transition-all">New Example</button>
+                                    <button id="explain-original-btn" title="Explain this sentence" class="bg-amber-100 text-amber-600 rounded-full py-1 px-3 text-sm font-semibold hover:bg-amber-200 transition-all">Explain</button>
+                              </div>
                               <div class="border-t border-slate-200 w-full my-4"></div>
                            </div>
-                           <div class="bg-sky-50 rounded-lg p-3">
+                           <div class="bg-sky-50 rounded-lg p-3 mx-4">
                               <p class="text-2xl font-semibold text-sky-700" id="vocab-hanzi"></p>
                               <p class="text-slate-500" id="vocab-pinyin"></p>
                               <p class="text-slate-700 font-medium" id="vocab-english"></p>
@@ -168,33 +177,31 @@
       <div id="completion-message" class="hidden text-center mt-8 p-6 bg-white rounded-xl shadow-lg">
             <h2 class="text-2xl font-bold text-emerald-600">Page Complete! 🎉</h2>
             <p class="text-slate-600 mt-2">You've finished this page. Try the next one!</p>
-            <button id="study-again-btn" class="mt-4 bg-sky-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-sky-600 transition-all">
-               Study Another Page
-            </button>
+            <button id="study-again-btn" class="mt-4 bg-sky-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-sky-600 transition-all">Study Another Page</button>
       </div>
    </div>
 
+   <!-- Settings Modal -->
    <div id="settings-modal" class="modal-overlay hidden">
       <div class="modal-content">
             <h2 class="text-xl font-bold mb-6 text-center">Settings</h2>
             <div class="space-y-6">
+               <div>
+                  <label for="api-key-input" class="block text-sm font-medium text-slate-700 mb-1">Gemini API Key:</label>
+                  <input type="password" id="api-key-input" placeholder="Enter your API key" class="w-full p-2 border border-slate-300 rounded-md shadow-sm">
+                  <p class="text-xs text-slate-500 mt-1">Get your key from <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-sky-600 hover:underline">Google AI Studio</a>. Your key is saved locally.</p>
+               </div>
                <div>
                   <label for="per-page-input" class="block text-sm font-medium text-slate-700 mb-1">Cards per Page/Seed:</label>
                   <input type="number" id="per-page-input" value="15" min="1" class="w-full p-2 border border-slate-300 rounded-md shadow-sm text-center">
                </div>
                <div class="flex items-center justify-between">
                   <label for="use-seed-toggle" class="text-sm font-medium text-slate-700">Use Page/Seed System:</label>
-                  <button id="use-seed-toggle" class="relative inline-flex items-center h-6 rounded-full w-11 transition-colors bg-gray-200">
-                        <span class="sr-only">Use Page/Seed System</span>
-                        <span class="inline-block w-4 h-4 transform bg-white rounded-full transition-transform"></span>
-                  </button>
+                  <button id="use-seed-toggle" class="relative inline-flex items-center h-6 rounded-full w-11 transition-colors bg-gray-200"><span class="sr-only">Use Page/Seed System</span><span class="inline-block w-4 h-4 transform bg-white rounded-full transition-transform"></span></button>
                </div>
                <div class="flex items-center justify-between">
                   <label for="random-toggle" class="text-sm font-medium text-slate-700">Randomize Cards:</label>
-                  <button id="random-toggle" class="relative inline-flex items-center h-6 rounded-full w-11 transition-colors bg-gray-200">
-                        <span class="sr-only">Randomize Cards</span>
-                        <span class="inline-block w-4 h-4 transform bg-white rounded-full transition-transform"></span>
-                  </button>
+                  <button id="random-toggle" class="relative inline-flex items-center h-6 rounded-full w-11 transition-colors bg-gray-200"><span class="sr-only">Randomize Cards</span><span class="inline-block w-4 h-4 transform bg-white rounded-full transition-transform"></span></button>
                </div>
             </div>
             <div class="mt-8 flex justify-end space-x-3">
@@ -204,6 +211,28 @@
       </div>
    </div>
    
+   <!-- AI Generation Modal -->
+   <div id="ai-modal" class="modal-overlay hidden">
+      <div class="modal-content">
+            <div class="flex justify-between items-start">
+               <h2 id="ai-modal-title" class="text-xl font-bold mb-4">AI Assistant</h2>
+               <button id="close-ai-modal-btn" class="text-slate-500 hover:text-slate-800 text-2xl leading-none">&times;</button>
+            </div>
+            <div id="ai-loading" class="text-center p-8">
+               <p class="text-slate-500">Generating with AI...</p>
+            </div>
+            <div id="ai-new-sentence-content" class="hidden space-y-4">
+               <div>
+                  <p class="text-lg text-slate-900 font-semibold" id="ai-sentence-hanzi"></p>
+                  <p class="text-md text-slate-500" id="ai-sentence-pinyin"></p>
+                  <p class="text-md text-slate-700 font-medium" id="ai-sentence-english"></p>
+               </div>
+               <button id="explain-structure-btn" class="w-full bg-amber-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-amber-600 transition-all">Explain Structure</button>
+            </div>
+            <div id="ai-explanation" class="hidden mt-4 p-3 bg-slate-50 rounded-lg text-sm text-slate-600 whitespace-pre-wrap"></div>
+      </div>
+   </div>
+
    <script>
       const vocabPacks = {
          'TOCFL A1': [
@@ -2423,7 +2452,6 @@
          ]
       };
 
-      // --- APPLICATION STATE ---
       const state = {
             currentPackName: '',
             fullVocabList: [],
@@ -2431,49 +2459,17 @@
             currentCard: null,
             isFlipped: false,
             settings: {
+               apiKey: '',
                sessionSize: 15,
                useSeed: true,
                isRandom: false,
-               studyMode: 'sentence', // 'sentence' or 'word'
-            }
+               studyMode: 'sentence',
+            },
+            aiGeneratedSentence: null,
       };
 
-      // --- DOM ELEMENTS ---
-      const setupScreenEl = document.getElementById('setup-screen');
-      const appContainerEl = document.getElementById('app-container');
-      const completionMessageEl = document.getElementById('completion-message');
-      const packSelectEl = document.getElementById('pack-select');
-      const seedInputEl = document.getElementById('seed-input');
-      const seedInputContainerEl = document.getElementById('seed-input-container');
-      const startBtn = document.getElementById('start-btn');
-      const changePackBtn = document.getElementById('change-pack-btn');
-      const studyAgainBtn = document.getElementById('study-again-btn');
-      const cardEl = document.getElementById('card');
-      const frontTextEl = document.getElementById('front-text');
-      const sentenceDetailsEl = document.getElementById('sentence-details');
-      const sentenceHanziPostEl = document.getElementById('sentence-hanzi-post');
-      const sentencePinyinEl = document.getElementById('sentence-pinyin');
-      const sentenceEnglishEl = document.getElementById('sentence-english');
-      const vocabHanziEl = document.getElementById('vocab-hanzi');
-      const vocabPinyinEl = document.getElementById('vocab-pinyin');
-      const vocabEnglishEl = document.getElementById('vocab-english');
-      const showAnswerBtn = document.getElementById('show-answer-btn');
-      const ratingButtonsEl = document.getElementById('rating-buttons');
-      const cardsLeftEl = document.getElementById('cards-left');
-      // Settings Modal Elements
-      const settingsBtn = document.getElementById('settings-btn');
-      const settingsModal = document.getElementById('settings-modal');
-      const perPageInput = document.getElementById('per-page-input');
-      const useSeedToggle = document.getElementById('use-seed-toggle');
-      const randomToggle = document.getElementById('random-toggle');
-      const saveSettingsBtn = document.getElementById('save-settings-btn');
-      const cancelSettingsBtn = document.getElementById('cancel-settings-btn');
+      let setupScreenEl, appContainerEl, completionMessageEl, packSelectEl, seedInputEl, seedInputContainerEl, startBtn, changePackBtn, studyAgainBtn, cardEl, frontTextEl, sentenceDetailsEl, sentenceHanziPostEl, sentencePinyinEl, sentenceEnglishEl, vocabHanziEl, vocabPinyinEl, vocabEnglishEl, showAnswerBtn, ratingButtonsEl, cardsLeftEl, settingsBtn, settingsModal, apiKeyInput, perPageInput, useSeedToggle, randomToggle, saveSettingsBtn, cancelSettingsBtn, generateSentenceBtn, explainOriginalBtn, aiModal, aiModalTitle, aiLoadingEl, aiNewSentenceContentEl, aiSentenceHanziEl, aiSentencePinyinEl, aiSentenceEnglishEl, closeAiModalBtn, explainStructureBtn, aiExplanationEl;
 
-      // --- FUNCTIONS ---
-
-      /**
-         * Toggles a button's visual state (on/off).
-         */
       function setToggleState(button, isActive) {
             if (isActive) {
                button.classList.add('bg-sky-500');
@@ -2486,41 +2482,45 @@
             }
       }
 
-      /**
-         * Loads settings from localStorage or uses defaults.
-         */
       function loadSettings() {
-            const savedSettings = localStorage.getItem('lingoFlowSettings');
+            const savedSettings = localStorage.getItem('flashcardSettings');
             if (savedSettings) {
-               // Make sure to merge defaults for any new settings
                state.settings = { ...state.settings, ...JSON.parse(savedSettings) };
             }
-            // Apply settings to the modal UI
+            apiKeyInput.value = state.settings.apiKey;
             perPageInput.value = state.settings.sessionSize;
             setToggleState(useSeedToggle, state.settings.useSeed);
             setToggleState(randomToggle, state.settings.isRandom);
-            
-            // Apply settings to the main setup screen UI
             document.querySelector(`#setup-screen input[name="study-mode"][value="${state.settings.studyMode}"]`).checked = true;
             seedInputContainerEl.style.display = state.settings.useSeed ? 'block' : 'none';
+            updateAIFeatureAvailability();
       }
 
-      /**
-         * Saves current settings from the modal to localStorage.
-         */
       function saveSettings() {
+            state.settings.apiKey = apiKeyInput.value.trim();
             state.settings.sessionSize = parseInt(perPageInput.value, 10) || 15;
             state.settings.useSeed = useSeedToggle.classList.contains('bg-sky-500');
             state.settings.isRandom = randomToggle.classList.contains('bg-sky-500');
-            // The studyMode is saved when starting a session
-            localStorage.setItem('lingoFlowSettings', JSON.stringify(state.settings));
-            seedInputContainerEl.style.display = state.settings.useSeed ? 'block' : 'none';
+            localStorage.setItem('flashcardSettings', JSON.stringify(state.settings));
             settingsModal.classList.add('hidden');
+            updateAIFeatureAvailability();
       }
 
-      /**
-         * Populates the pack selector dropdown.
-         */
+      function updateAIFeatureAvailability() {
+            const hasApiKey = state.settings.apiKey && state.settings.apiKey.length > 0;
+            generateSentenceBtn.disabled = !hasApiKey;
+            explainOriginalBtn.disabled = !hasApiKey;
+            
+            const tooltip = "Add your Gemini API key in settings to use this feature.";
+            if (!hasApiKey) {
+               generateSentenceBtn.title = tooltip;
+               explainOriginalBtn.title = tooltip;
+            } else {
+               generateSentenceBtn.title = "Generate a new example";
+               explainOriginalBtn.title = "Explain this sentence";
+            }
+      }
+
       function populatePackSelector() {
             packSelectEl.innerHTML = '';
             const packNames = Object.keys(vocabPacks);
@@ -2533,9 +2533,6 @@
             });
       }
       
-      /**
-         * Shuffles an array in place.
-         */
       function shuffleArray(array) {
             for (let i = array.length - 1; i > 0; i--) {
                const j = Math.floor(Math.random() * (i + 1));
@@ -2543,26 +2540,13 @@
             }
       }
 
-      /**
-         * Initializes a study session.
-         */
       function initSession() {
-            // Read the current study mode from the setup screen and save it
             state.settings.studyMode = document.querySelector('#setup-screen input[name="study-mode"]:checked').value;
-            localStorage.setItem('lingoFlowSettings', JSON.stringify(state.settings));
-
+            localStorage.setItem('flashcardSettings', JSON.stringify(state.settings));
             state.currentPackName = packSelectEl.value;
-            let sessionVocab = [...vocabPacks[state.currentPackName]]; // Create a copy
-
-            if (!sessionVocab) {
-               alert('Could not find the selected vocabulary pack.');
-               return;
-            }
-
-            if (state.settings.isRandom) {
-               shuffleArray(sessionVocab);
-            }
-
+            let sessionVocab = [...vocabPacks[state.currentPackName]];
+            if (state.settings.isRandom) shuffleArray(sessionVocab);
+            
             if (state.settings.useSeed) {
                const seed = parseInt(seedInputEl.value, 10) || 1;
                const startIndex = (seed - 1) * state.settings.sessionSize;
@@ -2573,13 +2557,11 @@
                   return;
                }
             } else {
-               state.reviewQueue = sessionVocab; // Use the whole (possibly shuffled) pack
+               state.reviewQueue = sessionVocab;
             }
-
             setupScreenEl.classList.add('hidden');
             completionMessageEl.classList.add('hidden');
             appContainerEl.classList.remove('hidden');
-            
             showNextCard();
       }
 
@@ -2599,28 +2581,24 @@
             cardEl.classList.remove('is-flipped');
             
             setTimeout(() => {
-               // Populate all data fields for the back of the card first
                vocabHanziEl.textContent = state.currentCard.hanzi;
                vocabPinyinEl.textContent = state.currentCard.pinyin;
                vocabEnglishEl.textContent = state.currentCard.english;
                sentenceHanziPostEl.textContent = state.currentCard.sentence_hanzi;
                sentencePinyinEl.textContent = state.currentCard.sentence_pinyin;
                sentenceEnglishEl.textContent = state.currentCard.sentence_english;
-
-               // Ensure sentence details are always visible on the back of the card
                sentenceDetailsEl.classList.remove('hidden');
 
-               // Now, set the front text based on the study mode
                if (state.settings.studyMode === 'word') {
                   frontTextEl.textContent = state.currentCard.hanzi;
-                  frontTextEl.classList.add('text-5xl'); // Make word bigger
+                  frontTextEl.classList.add('text-5xl');
                   frontTextEl.classList.remove('text-3xl', 'md:text-4xl');
-               } else { // Sentence mode
+               } else {
                   frontTextEl.textContent = state.currentCard.sentence_hanzi;
                   frontTextEl.classList.remove('text-5xl');
                   frontTextEl.classList.add('text-3xl', 'md:text-4xl');
                }
-            }, 150); // Delay to allow card to flip back smoothly
+            }, 150);
 
             showAnswerBtn.style.display = 'block';
             ratingButtonsEl.classList.add('hidden');
@@ -2649,7 +2627,6 @@
       function showCompletionScreen() {
             appContainerEl.classList.add('hidden');
             completionMessageEl.classList.remove('hidden');
-            
             if(state.settings.useSeed) {
                const currentSeed = parseInt(seedInputEl.value, 10) || 1;
                seedInputEl.value = currentSeed + 1;
@@ -2662,43 +2639,183 @@
             setupScreenEl.classList.remove('hidden');
       }
 
-      // --- EVENT LISTENERS ---
-      startBtn.addEventListener('click', initSession);
-      showAnswerBtn.addEventListener('click', handleShowAnswer);
-      ratingButtonsEl.addEventListener('click', (e) => {
-            const button = e.target.closest('button');
-            if (button && button.dataset.rating) {
-               handleRating(button.dataset.rating);
+      async function callGeminiAPI(prompt) {
+            const apiKey = state.settings.apiKey;
+            if (!apiKey) {
+               throw new Error("API Key is missing. Please add it in the settings.");
             }
-      });
-      studyAgainBtn.addEventListener('click', returnToSetup);
-      changePackBtn.addEventListener('click', returnToSetup);
+            
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+            const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
 
-      // Settings Modal Listeners
-      settingsBtn.addEventListener('click', () => {
-            // Load current settings into modal when it opens
-            perPageInput.value = state.settings.sessionSize;
-            setToggleState(useSeedToggle, state.settings.useSeed);
-            setToggleState(randomToggle, state.settings.isRandom);
-            settingsModal.classList.remove('hidden');
-      });
-      cancelSettingsBtn.addEventListener('click', () => {
-            settingsModal.classList.add('hidden');
-      });
-      saveSettingsBtn.addEventListener('click', saveSettings);
-      useSeedToggle.addEventListener('click', () => {
-            const isActive = useSeedToggle.classList.contains('bg-sky-500');
-            setToggleState(useSeedToggle, !isActive);
-      });
-      randomToggle.addEventListener('click', () => {
-            const isActive = randomToggle.classList.contains('bg-sky-500');
-            setToggleState(randomToggle, !isActive);
-      });
+            const response = await fetch(apiUrl, {
+               method: 'POST',
+               headers: { 'Content-Type': 'application/json' },
+               body: JSON.stringify(payload)
+            });
 
-      // --- INITIALIZE THE APP ---
+            if (!response.ok) {
+               const errorBody = await response.text();
+               throw new Error(`API request failed with status ${response.status}: ${errorBody}`);
+            }
+
+            const result = await response.json();
+
+            if (result.candidates && result.candidates.length > 0 && result.candidates[0].content.parts.length > 0) {
+               return result.candidates[0].content.parts[0].text;
+            } else {
+               throw new Error("Invalid response structure from AI.");
+            }
+      }
+
+      async function handleGenerateSentence() {
+            if (!state.currentCard) return;
+
+            aiModal.classList.remove('hidden');
+            aiLoadingEl.classList.remove('hidden');
+            aiNewSentenceContentEl.classList.add('hidden');
+            aiExplanationEl.classList.add('hidden');
+            aiExplanationEl.textContent = '';
+            aiModalTitle.textContent = 'New Example Sentence';
+            state.aiGeneratedSentence = null;
+
+            const wordToUse = state.currentCard.hanzi.split(' ')[0];
+            const currentSentence = state.currentCard.sentence_hanzi;
+            const prompt = `The current Chinese sentence is: "${currentSentence}". Using the Chinese word "${wordToUse}", create a simple, new example sentence that is related to the context of the first sentence. Provide the new sentence in these three parts, clearly labeled: "Hanzi:", "Pinyin:", and "English:".`;
+            
+            try {
+               const text = await callGeminiAPI(prompt);
+               const hanzi = text.match(/Hanzi:\s*(.*)/i)?.[1].trim() || "N/A";
+               const pinyin = text.match(/Pinyin:\s*(.*)/i)?.[1].trim() || "N/A";
+               const english = text.match(/English:\s*(.*)/i)?.[1].trim() || "N/A";
+
+               state.aiGeneratedSentence = { hanzi, pinyin, english };
+               aiSentenceHanziEl.textContent = hanzi;
+               aiSentencePinyinEl.textContent = pinyin;
+               aiSentenceEnglishEl.textContent = english;
+               aiNewSentenceContentEl.classList.remove('hidden');
+               
+            } catch (error) {
+               console.error("AI Generation Error:", error);
+               aiExplanationEl.textContent = "Error: " + error.message;
+               aiExplanationEl.classList.remove('hidden');
+            } finally {
+               aiLoadingEl.classList.add('hidden');
+            }
+      }
+
+      async function handleExplainSentence(sentenceToExplain) {
+            if (!sentenceToExplain) return;
+            
+            aiExplanationEl.textContent = 'Analyzing...';
+            aiExplanationEl.classList.remove('hidden');
+
+            const prompt = `Provide a word-by-word grammatical breakdown of the Chinese sentence: "${sentenceToExplain}". For each word, explain its meaning and grammatical function in the sentence.`;
+
+            try {
+               const explanation = await callGeminiAPI(prompt);
+               aiExplanationEl.textContent = explanation;
+            } catch (error) {
+               console.error("AI Explanation Error:", error);
+               aiExplanationEl.textContent = "Error generating explanation: " + error.message;
+            }
+      }
+      
+      async function handleExplainOriginalSentence() {
+            if (!state.currentCard) return;
+            
+            aiModal.classList.remove('hidden');
+            aiLoadingEl.classList.remove('hidden');
+            aiNewSentenceContentEl.classList.add('hidden');
+            aiExplanationEl.classList.add('hidden');
+            aiExplanationEl.textContent = '';
+            aiModalTitle.textContent = 'Sentence Explanation';
+
+            try {
+               await handleExplainSentence(state.currentCard.sentence_hanzi);
+            } finally {
+               aiLoadingEl.classList.add('hidden');
+            }
+      }
+
       document.addEventListener('DOMContentLoaded', () => {
+            setupScreenEl = document.getElementById('setup-screen');
+            appContainerEl = document.getElementById('app-container');
+            completionMessageEl = document.getElementById('completion-message');
+            packSelectEl = document.getElementById('pack-select');
+            seedInputEl = document.getElementById('seed-input');
+            seedInputContainerEl = document.getElementById('seed-input-container');
+            startBtn = document.getElementById('start-btn');
+            changePackBtn = document.getElementById('change-pack-btn');
+            studyAgainBtn = document.getElementById('study-again-btn');
+            cardEl = document.getElementById('card');
+            frontTextEl = document.getElementById('front-text');
+            sentenceDetailsEl = document.getElementById('sentence-details');
+            sentenceHanziPostEl = document.getElementById('sentence-hanzi-post');
+            sentencePinyinEl = document.getElementById('sentence-pinyin');
+            sentenceEnglishEl = document.getElementById('sentence-english');
+            vocabHanziEl = document.getElementById('vocab-hanzi');
+            vocabPinyinEl = document.getElementById('vocab-pinyin');
+            vocabEnglishEl = document.getElementById('vocab-english');
+            showAnswerBtn = document.getElementById('show-answer-btn');
+            ratingButtonsEl = document.getElementById('rating-buttons');
+            cardsLeftEl = document.getElementById('cards-left');
+            settingsBtn = document.getElementById('settings-btn');
+            settingsModal = document.getElementById('settings-modal');
+            apiKeyInput = document.getElementById('api-key-input');
+            perPageInput = document.getElementById('per-page-input');
+            useSeedToggle = document.getElementById('use-seed-toggle');
+            randomToggle = document.getElementById('random-toggle');
+            saveSettingsBtn = document.getElementById('save-settings-btn');
+            cancelSettingsBtn = document.getElementById('cancel-settings-btn');
+            generateSentenceBtn = document.getElementById('generate-sentence-btn');
+            explainOriginalBtn = document.getElementById('explain-original-btn');
+            aiModal = document.getElementById('ai-modal');
+            aiModalTitle = document.getElementById('ai-modal-title');
+            aiLoadingEl = document.getElementById('ai-loading');
+            aiNewSentenceContentEl = document.getElementById('ai-new-sentence-content');
+            aiSentenceHanziEl = document.getElementById('ai-sentence-hanzi');
+            aiSentencePinyinEl = document.getElementById('ai-sentence-pinyin');
+            aiSentenceEnglishEl = document.getElementById('ai-sentence-english');
+            closeAiModalBtn = document.getElementById('close-ai-modal-btn');
+            explainStructureBtn = document.getElementById('explain-structure-btn');
+            aiExplanationEl = document.getElementById('ai-explanation');
+
             loadSettings();
             populatePackSelector();
+
+            startBtn.addEventListener('click', initSession);
+            showAnswerBtn.addEventListener('click', handleShowAnswer);
+            ratingButtonsEl.addEventListener('click', (e) => {
+               const button = e.target.closest('button');
+               if (button && button.dataset.rating) handleRating(button.dataset.rating);
+            });
+            studyAgainBtn.addEventListener('click', returnToSetup);
+            changePackBtn.addEventListener('click', returnToSetup);
+            settingsBtn.addEventListener('click', () => settingsModal.classList.remove('hidden'));
+            cancelSettingsBtn.addEventListener('click', () => settingsModal.classList.add('hidden'));
+            saveSettingsBtn.addEventListener('click', saveSettings);
+            closeAiModalBtn.addEventListener('click', () => aiModal.classList.add('hidden'));
+            useSeedToggle.addEventListener('click', () => {
+               setToggleState(useSeedToggle, !useSeedToggle.classList.contains('bg-sky-500'));
+            });
+            randomToggle.addEventListener('click', () => {
+               setToggleState(randomToggle, !randomToggle.classList.contains('bg-sky-500'));
+            });
+            generateSentenceBtn.addEventListener('click', handleGenerateSentence);
+            explainOriginalBtn.addEventListener('click', handleExplainOriginalSentence);
+            explainStructureBtn.addEventListener('click', () => handleExplainSentence(state.aiGeneratedSentence?.hanzi));
+            
+            aiModal.addEventListener('click', function(e) {
+               if (e.target === this) {
+                  aiModal.classList.add('hidden');
+               }
+            });
+            settingsModal.addEventListener('click', function(e) {
+               if (e.target === this) {
+                  settingsModal.classList.add('hidden');
+               }
+            });
       });
    </script>
 </body>
