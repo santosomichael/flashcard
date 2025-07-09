@@ -11,18 +11,31 @@ Paged Learning: Study cards in manageable chunks using the "Page / Seed" system.
 
 Flexible Study Modes:
 
+Word Mode: Focus on individual vocabulary words.
+
+Sentence Mode: Learn words in their original context.
+
 Randomize Cards: Shuffle the deck for a more challenging session.
 
-Full Deck Mode: Disable the paging system to study all cards in a pack at once.
+Customizable Sessions: Use the settings panel to control cards per page, randomization, and more.
 
-Customizable Sessions: Use the settings panel to control the number of cards per page.
+Persistent Settings: Your preferences and API key are saved in your browser's local storage.
 
-Persistent Settings: Your preferred settings are automatically saved in your browser's local storage.
+🤖 AI-Powered Features (Powered by Google Gemini)
+Generate New Examples: Go beyond the default sentence. For any vocabulary word, generate a completely new, contextually relevant example sentence with the click of a button.
 
-Simple SRS: An "Again" button that re-inserts tricky cards back into your current study queue.
+Explain Sentence Structure: Don't just memorize—understand. Get a detailed, word-by-word grammatical breakdown for any sentence, whether it's the original or one you generated.
 
 🚀 How to Use
-Local Use: Simply download the files and open the index.html file in your favorite web browser.
+Local Use: Simply download the index.html file and open it in your favorite web browser.
+
+Enable AI Features: To use the "Examples" and "Explain" features, you need a Gemini API key.
+
+Get a free key from Google AI Studio.
+
+Click the gear icon in the top-right corner of the app to open the settings.
+
+Paste your API key into the designated field and click "Save". The AI features will now be enabled.
 
 Adding Vocab: To add your own words, open the index.html file and edit the vocabPacks JavaScript object. Just follow the existing JSON structure.
 
