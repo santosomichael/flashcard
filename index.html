@@ -2600,38 +2600,55 @@
             cardEl.classList.remove('is-flipped');
             
             setTimeout(() => {
+               const hanziVariants = state.currentCard.hanzi.split(' ').filter(w => w !== 's' && w !== 't');
+               let targetHanzi = hanziVariants[0] || ''; // Default to first variant
+               for (const variant of hanziVariants) {
+                  if (state.currentCard.sentence_hanzi.includes(variant)) {
+                        targetHanzi = variant;
+                        break;
+                  }
+               }
+               
+               const targetPinyin = state.currentCard.pinyin;
+               const hanziRegex = new RegExp(`(${targetHanzi})`, 'g');
+               const pinyinRegex = new RegExp(`(${targetPinyin})`, 'gi');
+
                vocabHanziEl.textContent = state.currentCard.hanzi;
-               vocabPinyinEl.textContent = state.currentCard.pinyin;
+               vocabPinyinEl.textContent = targetPinyin;
                vocabEnglishEl.textContent = state.currentCard.english;
-               sentenceHanziPostEl.textContent = state.currentCard.sentence_hanzi;
-               sentencePinyinEl.textContent = state.currentCard.sentence_pinyin;
+               
+               const boldedHanziSentence = state.currentCard.sentence_hanzi.replace(hanziRegex, `<strong class="text-sky-600">$1</strong>`);
+               const boldedPinyinSentence = state.currentCard.sentence_pinyin.replace(pinyinRegex, `<strong class="text-sky-600">$1</strong>`);
+
+               sentenceHanziPostEl.innerHTML = boldedHanziSentence;
+               sentencePinyinEl.innerHTML = boldedPinyinSentence;
                sentenceEnglishEl.textContent = state.currentCard.sentence_english;
 
                let frontContent = '';
                if (state.settings.studyMode === 'word') {
                      switch (state.settings.difficulty) {
                         case 'easy':
-                           frontContent = `<p class="text-3xl">${state.currentCard.pinyin}</p>`;
+                           frontContent = `<p class="text-3xl">${targetPinyin}</p>`;
                            break;
                         case 'medium':
-                           frontContent = `<p class="text-5xl">${state.currentCard.hanzi}</p><p class="text-2xl text-slate-500 mt-2">${state.currentCard.pinyin}</p>`;
+                           frontContent = `<p class="text-5xl">${targetHanzi}</p><p class="text-2xl text-slate-500 mt-2">${targetPinyin}</p>`;
                            break;
                         case 'hard':
                         default:
-                           frontContent = `<p class="text-5xl">${state.currentCard.hanzi}</p>`;
+                           frontContent = `<p class="text-5xl">${targetHanzi}</p>`;
                            break;
                   }
                } else { // Sentence mode
                   switch (state.settings.difficulty) {
                         case 'easy':
-                           frontContent = `<p class="text-2xl">${state.currentCard.sentence_pinyin}</p>`;
+                           frontContent = `<p class="text-2xl">${boldedPinyinSentence}</p>`;
                            break;
                         case 'medium':
-                           frontContent = `<p>${state.currentCard.sentence_hanzi}</p><p class="text-xl text-slate-500 mt-2">${state.currentCard.sentence_pinyin}</p>`;
+                           frontContent = `<p>${boldedHanziSentence}</p><p class="text-xl text-slate-500 mt-2">${boldedPinyinSentence}</p>`;
                            break;
                         case 'hard':
                         default:
-                           frontContent = `<p>${state.currentCard.sentence_hanzi}</p>`;
+                           frontContent = `<p>${boldedHanziSentence}</p>`;
                            break;
                   }
                }
@@ -2717,7 +2734,7 @@
             aiModalTitle.textContent = 'New Example Sentence';
             state.aiGeneratedSentence = null;
 
-            const wordToUse = state.currentCard.pinyin;
+            const wordToUse = state.currentCard.hanzi.split(' ')[0];
             const currentSentence = state.currentCard.sentence_hanzi;
             const prompt = `The current Chinese sentence is: "${currentSentence}". Using the Chinese word "${wordToUse}", create a simple, new example sentence that is related to the context of the first sentence. Provide the new sentence in these three parts, clearly labeled: "Hanzi:", "Pinyin:", and "English:".`;
             
