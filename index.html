@@ -6795,10 +6795,16 @@
                const hanziRegex = new RegExp(`(${targetHanzi})`, 'g');
 
                let formattedVocabHanzi = state.currentCard.hanzi;
-               if (state.currentLanguage === 'zh-CN' && (formattedVocabHanzi.startsWith('s ') && formattedVocabHanzi.includes(' t ') || formattedVocabHanzi.startsWith(' s ') && formattedVocabHanzi.includes('t ')) {
+               if (state.currentLanguage === 'zh-CN' && formattedVocabHanzi.startsWith('s ') && formattedVocabHanzi.includes(' t ')) {
                   formattedVocabHanzi = formattedVocabHanzi.replace('s ', 'S: ').replace(' t ', ' | T: ');
                } else {
                   formattedVocabHanzi = formattedVocabHanzi.replace('s ', '').replace('t ', '');
+               }
+
+               if (state.currentLanguage === 'zh-CN' && formattedVocabHanzi.startsWith('t ') && formattedVocabHanzi.includes(' s ')) {
+                  formattedVocabHanzi = formattedVocabHanzi.replace('t ', 'T: ').replace(' s ', ' | S: ');
+               } else {
+                  formattedVocabHanzi = formattedVocabHanzi.replace('t ', '').replace('s ', '');
                }
                
                vocabHanziEl.innerHTML = `${formattedVocabHanzi} <span class="speaker-icon" data-speak="${targetHanzi}">🔊</span>`;
